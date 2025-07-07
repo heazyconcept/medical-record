@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import patientRoutes from './routes/patientRoutes'
 
 dotenv.config();
 
@@ -15,8 +16,5 @@ mongoose.connect(process.env.MONGODB_URL as string)
   .catch(err => console.error("MongoDB connection error", err));
 
 // Default route
-app.use("/", (req, res) => {
-  res.send("Welcome to the Medical Record System");
-});
-
+app.use('/patients', patientRoutes)
 export default app;
