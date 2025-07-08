@@ -163,43 +163,38 @@ export const addMedication = async (req: Request, res: Response): Promise<any> =
             });
         }
 
-        // First find the patient to check if they exist
-        const existingPatient = await Patient.findById(id);
-        if (!existingPatient) {
-            return res.status(404).json({message: 'Patient not Found'});
-        }
+        const updateData = {
+            pharmacistNote: {
+                drugs: drugs,
+                dosage: dosage,
+                duration: duration
+            },
+            status: 'completed',
+            'timeStamp.medicationDispensedAt': new Date()
+        };
 
-        // Update the patient with medication details
         const patient = await Patient.findByIdAndUpdate(
             id,
-            {
-                pharmacistNote: {
-                    drugs: drugs,
-                    dosage: dosage,
-                    duration: duration
-                },
-                status: 'completed',
-                'timeStamp.medicationDispensedAt': new Date()
-            },
+            { $set: updateData },
             {
                 new: true,
                 runValidators: true
             }
         );
 
-        if (!patient) {
+        if(!patient) {
             return res.status(404).json({message: 'Patient not Found'});
         }
 
         // Verify the update was successful
-        const updatedPatient = await Patient.findById(id);
-        if (!updatedPatient?.pharmacistNote?.drugs || updatedPatient.pharmacistNote.drugs.length === 0) {
+        if (!patient.pharmacistNote || !patient.pharmacistNote.drugs || patient.pharmacistNote.drugs.length === 0) {
             return res.status(500).json({
-                message: 'Failed to update pharmacist note properly'
+                message: 'Failed to update pharmacist note properly',
+                patient: patient
             });
         }
 
-        res.json(updatedPatient);
+        res.json(patient);
     } catch (error: any) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({

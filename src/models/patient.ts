@@ -70,10 +70,17 @@ const PatientSchema: Schema = new Schema({
     pharmacistNote: {
         drugs: {
             type: [String],
+            required: true,
             default: undefined
         },
-        dosage: {type: String},
-        duration: {type: String}
+        dosage: {
+            type: String,
+            required: true
+        },
+        duration: {
+            type: String,
+            required: true
+        }
     },
     timeStamp: {
         registeredAt: {type: Date, default: Date.now},
