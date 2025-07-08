@@ -15,8 +15,8 @@ export interface doctorNote {
 
 export interface pharmacistNote {
   drugs: string[];
- dosage: string;
- duration: string;
+  dosage: string;
+  duration: string;
 }
 
 export interface Timestamps {
@@ -31,10 +31,12 @@ export interface IPatient extends Document{
     lastName: string;
     dateOfBirth: Date;
     age: number;
+    phoneNumber: string;
+    address: string;
     status: patientStatus;
     nurseNotes?: string;
     doctorNotes?: doctorNote;
-    pharmacistNotes?: pharmacistNote;
+    pharmacistNote?: pharmacistNote;
     timestamps: Timestamps
 }
 
@@ -43,6 +45,17 @@ const PatientSchema: Schema = new Schema({
     lastName: {type: String, required: true},
     dateOfBirth: {type: String, required: true},
     age: { type: Number, required: true},
+    phoneNumber: {
+        type: String,
+        required: true,
+        unique: true,
+        match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number']
+    },
+    address: {
+        type: String,
+        required: true,
+        trim: true
+    },
     status: {
         type: String,
         required: true,
@@ -54,16 +67,19 @@ const PatientSchema: Schema = new Schema({
         diagnosis: {type: String},
         instructions: { type: String}
     },
-    pharmacistNote:{
-        drugs: [{type: String}],
+    pharmacistNote: {
+        drugs: {
+            type: [String],
+            default: undefined
+        },
         dosage: {type: String},
-        duration: { type: String}
+        duration: {type: String}
     },
     timeStamp: {
         registeredAt: {type: Date, default: Date.now},
         notesTakenAt: {type: Date},
         doctorReviewedAt: {type: Date},
-         medicationDispensedAt: {type: Date}
+        medicationDispensedAt: {type: Date}
     }
 });
 
