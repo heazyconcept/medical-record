@@ -67,21 +67,21 @@ const PatientSchema: Schema = new Schema({
         diagnosis: {type: String},
         instructions: { type: String}
     },
-    pharmacistNote: {
-        drugs: {
-            type: [String],
-            required: true,
-            default: undefined
-        },
-        dosage: {
-            type: String,
-            required: true
-        },
-        duration: {
-            type: String,
-            required: true
-        }
-    },
+    // pharmacistNote: {
+    //     drugs: {
+    //         type: [String],
+    //         required: true,
+    //         default: undefined
+    //     },
+    //     dosage: {
+    //         type: String,
+    //         required: true
+    //     },
+    //     duration: {
+    //         type: String,
+    //         required: true
+    //     }
+    // },
     timeStamp: {
         registeredAt: {type: Date, default: Date.now},
         notesTakenAt: {type: Date},
