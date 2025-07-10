@@ -29,7 +29,7 @@ router.get('/', checkRole(allRoles), getPatients);
 router.get('/:id', checkRole(allRoles), getPatient);
 
 // Register new patient (Registrar only)
-router.post('/', checkRole(registrarRoles), registerPatient);
+router.post('/register', checkRole(registrarRoles), registerPatient);
 
 // Add nurse notes (Nurse only)
 router.patch('/:id/nurse-notes', checkRole(nurseRoles), addNurseNotes);
