@@ -4,6 +4,7 @@ import { registerPatient, getPatients, addNurseNotes, addDoctorNote,addMedicatio
 const router = Router();
 
 router.post('/register', registerPatient)
+
 router.get('/', getPatients)
 
 router.patch('/:id/nurse-notes', addNurseNotes)
