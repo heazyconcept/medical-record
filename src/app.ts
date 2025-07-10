@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import patientRoutes from './routes/patientRoutes'
+import patientRoutes from './routes/patients';
+import authRoutes from './routes/auth';
+import { createInitialUsers } from './controllers/authController';
 
 dotenv.config();
 
@@ -12,9 +14,15 @@ app.use(cors());
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI as string)
-  .then(() => console.log("Connected to MongoDB"))
+  .then(() => {
+    console.log("Connected to MongoDB");
+    // Create initial users for testing
+    createInitialUsers();
+  })
   .catch(err => console.error("MongoDB connection error", err));
 
-// Default route
-app.use('/patients', patientRoutes)
+// Routes
+app.use('/auth', authRoutes);
+app.use('/patients', patientRoutes);
+
 export default app;
