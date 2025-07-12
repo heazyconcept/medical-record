@@ -142,69 +142,27 @@ export const addDoctorNote = async (req: Request, res: Response): Promise<any> =
 export const addMedication = async (req: Request, res: Response): Promise<any> => {
     try {
         const {id} = req.params;
-        const {drugs, dosage, duration} = req.body;
 
-        // Validate required fields
-        if (!drugs || !Array.isArray(drugs) || drugs.length === 0) {
-            return res.status(400).json({
-                message: 'Please provide at least one drug in the drugs array'
-            });
-        }
-
-        if (!dosage) {
-            return res.status(400).json({
-                message: 'Dosage is required'
-            });
-        }
-
-        if (!duration) {
-            return res.status(400).json({
-                message: 'Duration is required'
-            });
-        }
-
-        const updateData = {
-            pharmacistNote: {
-                drugs: drugs,
-                dosage: dosage,
-                duration: duration
-            },
-            status: 'completed',
-            'timeStamp.medicationDispensedAt': new Date()
-        };
-
-        const patient = await Patient.findByIdAndUpdate(
-            id,
-            { $set: updateData },
-            {
-                new: true,
-                runValidators: true
-            }
-        );
-
+        const patient = await Patient.findById(id);
         if(!patient) {
             return res.status(404).json({message: 'Patient not Found'});
         }
 
-        // Verify the update was successful
-        if (!patient.pharmacistNote || !patient.pharmacistNote.drugs || patient.pharmacistNote.drugs.length === 0) {
-            return res.status(500).json({
-                message: 'Failed to update pharmacist note properly',
-                patient: patient
-            });
+        if (patient.status !== 'awaiting_medication') {
+            return res.status(400).json({message: 'Can only dispense medication to patients awaiting medication'});
         }
 
-        res.json(patient);
-    } catch (error: any) {
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({
-                message: 'Validation error',
-                errors: Object.values(error.errors).map((err: any) => err.message)
-            });
-        }
-        res.status(500).json({
-            message: 'Error adding medications',
-            error: error.message
-        });
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            id,
+            {
+                status: 'completed',
+                $set: { 'timestamps.medicationDispensedAt': new Date() }
+            },
+            { new: true }
+        );
+
+        res.json(updatedPatient);
+    } catch (error) {
+        res.status(500).json({message: 'Error marking medication as dispensed'});
     }
 };

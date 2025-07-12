@@ -13,12 +13,6 @@ export interface doctorNote {
   instructions: string;
 }
 
-export interface pharmacistNote {
-  drugs: string[];
-  dosage: string;
-  duration: string;
-}
-
 export interface Timestamps {
     registeredAt: Date;
     noteTakenAt: Date;
@@ -36,7 +30,6 @@ export interface IPatient extends Document{
     status: patientStatus;
     nurseNotes?: string;
     doctorNotes?: doctorNote;
-    pharmacistNote?: pharmacistNote;
     timestamps: Timestamps
 }
 
@@ -66,21 +59,6 @@ const PatientSchema: Schema = new Schema({
     doctorNote: {
         diagnosis: {type: String},
         instructions: { type: String}
-    },
-    pharmacistNote: {
-        drugs: {
-            type: [String],
-           
-            default: undefined
-        },
-        dosage: {
-            type: String,
-            
-        },
-        duration: {
-            type: String,
-            
-        }
     },
     timestamps: {
         registeredAt: {type: Date, default: Date.now},

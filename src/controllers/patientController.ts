@@ -254,24 +254,6 @@ export const addMedication = async (req: Request, res: Response): Promise<void> 
         }
 
         const { id } = req.params;
-        const { drugs, dosage, duration } = req.body;
-
-        // Validate required fields
-        if (!drugs || !Array.isArray(drugs) || drugs.length === 0) {
-            res.status(400).json({ message: 'Please provide at least one drug in the drugs array' });
-            return;
-        }
-
-        if (!dosage) {
-            res.status(400).json({ message: 'Dosage is required' });
-            return;
-        }
-
-        if (!duration) {
-            res.status(400).json({ message: 'Duration is required' });
-            return;
-        }
-
         const patient = await Patient.findById(id);
 
         if (!patient) {
@@ -280,38 +262,22 @@ export const addMedication = async (req: Request, res: Response): Promise<void> 
         }
 
         if (patient.status !== 'awaiting_medication') {
-            res.status(400).json({ message: 'Can only add medication to patients awaiting medication' });
+            res.status(400).json({ message: 'Can only dispense medication to patients awaiting medication' });
             return;
         }
 
         const updatedPatient = await Patient.findByIdAndUpdate(
             id,
             {
-                pharmacistNote: { drugs, dosage, duration },
                 status: 'completed',
                 $set: { 'timestamps.medicationDispensedAt': new Date() }
             },
-            { new: true, runValidators: true }
+            { new: true }
         );
 
-        if (!updatedPatient?.pharmacistNote?.drugs || updatedPatient.pharmacistNote.drugs.length === 0) {
-            res.status(500).json({
-                message: 'Failed to update pharmacist note properly',
-                patient: updatedPatient
-            });
-            return;
-        }
-
         res.json(updatedPatient);
-    } catch (error: any) {
-        if (error.name === 'ValidationError') {
-            res.status(400).json({
-                message: 'Validation error',
-                errors: Object.values(error.errors).map((err: any) => err.message)
-            });
-            return;
-        }
-        console.error('Error adding medications:', error);
+    } catch (error) {
+        console.error('Error marking medication as dispensed:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 }; 
