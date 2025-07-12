@@ -62,7 +62,7 @@ const PatientSchema: Schema = new Schema({
         enum: ['registered', 'awaiting_doctor', 'awaiting_medication', 'completed'],
         default: 'registered'
     },
-    nurseNote: {type: String},
+    nurseNotes: {type: String},
     doctorNote: {
         diagnosis: {type: String},
         instructions: { type: String}
@@ -82,7 +82,7 @@ const PatientSchema: Schema = new Schema({
             
         }
     },
-    timeStamp: {
+    timestamps: {
         registeredAt: {type: Date, default: Date.now},
         notesTakenAt: {type: Date},
         doctorReviewedAt: {type: Date},
