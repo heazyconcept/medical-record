@@ -21,7 +21,7 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
                 // Doctor can see patients with nurse notes taken
                 query = { 
                     status: 'awaiting_doctor',
-                    nurseNote: { $exists: true, $ne: null }
+                    nurseNotes: { $exists: true, $ne: null }
                 };
                 break;
             case 'pharmacist':
@@ -36,7 +36,7 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
                 return;
         }
 
-        const patients = await Patient.find(query).sort({ 'timeStamp.registeredAt': -1 });
+        const patients = await Patient.find(query).sort({ 'timestamps.registeredAt': -1 });
         res.json(patients);
     } catch (error) {
         console.error('Error fetching patients:', error);
@@ -189,9 +189,9 @@ export const addNurseNotes = async (req: Request, res: Response): Promise<void> 
         const updatedPatient = await Patient.findByIdAndUpdate(
             id,
             {
-                nurseNote: notes,
+                nurseNotes: notes,
                 status: 'awaiting_doctor',
-                $set: { 'timestamps.noteTakenAt': new Date() }
+                $set: { 'timestamps.notesTakenAt': new Date() }
             },
             { new: true }
         );
