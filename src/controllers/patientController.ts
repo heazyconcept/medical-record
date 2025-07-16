@@ -7,7 +7,6 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
     try {
         const userRole = req.user?.role;
         let query = {};
-        let projection = {};
 
         // Apply role-based filters
         switch (userRole) {
@@ -25,19 +24,8 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
                 };
                 break;
             case 'pharmacist':
-                // Pharmacist can only see patients awaiting medication with doctor's notes
-                query = { 
-                    status: 'awaiting_medication',
-                    doctorNote: { $exists: true }
-                };
-                projection = {
-                    firstName: 1,
-                    lastName: 1,
-                    age: 1,
-                    status: 1,
-                    doctorNote: 1,  // Include doctor's diagnosis and instructions
-                    timestamps: 1
-                };
+                // Pharmacist can only see patients awaiting medication
+                query = { status: 'awaiting_medication' };
                 break;
             case 'admin':
                 // Admin can see all patients
@@ -47,7 +35,7 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
                 return;
         }
 
-        const patients = await Patient.find(query, projection).sort({ 'timestamps.registeredAt': -1 });
+        const patients = await Patient.find(query).sort({ 'timestamps.registeredAt': -1 });
         res.json(patients);
     } catch (error) {
         console.error('Error fetching patients:', error);
