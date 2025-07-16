@@ -14,8 +14,7 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
                 // Registrar can see all patients
                 break;
             case 'nurse':
-                // Nurse can only see patients with status 'registered'
-                query = { status: 'registered' };
+                // Nurse can see all patients
                 break;
             case 'doctor':
                 // Doctor can see patients with nurse notes taken
