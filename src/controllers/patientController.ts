@@ -35,7 +35,8 @@ export const getPatients = async (req: Request, res: Response): Promise<void> =>
                 return;
         }
 
-        const patients = await Patient.find(query).sort({ 'timestamps.registeredAt': -1 });
+        // Sort by registeredAt timestamp in ascending order (oldest first - FIFO)
+        const patients = await Patient.find(query).sort({ 'timestamps.registeredAt': 1 });
         res.json(patients);
     } catch (error) {
         console.error('Error fetching patients:', error);

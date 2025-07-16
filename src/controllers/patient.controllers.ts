@@ -80,8 +80,9 @@ export const getPatients = async (req: Request, res: Response) => {
             query = {status};
         }
 
-        const patients = await Patient.find(query);
-        res.json(patients)
+        // Sort by registeredAt timestamp in ascending order (oldest first - FIFO)
+        const patients = await Patient.find(query).sort({ 'timestamps.registeredAt': 1 });
+        res.json(patients);
     } catch (error) {
         res.status(500).json({ message: "Error fetching patients", error});
     }
