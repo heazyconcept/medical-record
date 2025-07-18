@@ -60,6 +60,7 @@ const PatientSchema: Schema = new Schema({
         diagnosis: {type: String},
         instructions: { type: String}
     },
+    
     timestamps: {
         registeredAt: {type: Date, default: Date.now},
         notesTakenAt: {type: Date},
