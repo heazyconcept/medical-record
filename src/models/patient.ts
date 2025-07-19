@@ -27,6 +27,7 @@ export interface IPatient extends Document{
     age: number;
     phoneNumber: string;
     address: string;
+    gender?: string;
     status: patientStatus;
     nurseNotes?: string;
     doctorNotes?: doctorNote;
@@ -42,7 +43,7 @@ const PatientSchema: Schema = new Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number']
+        match: [/^\+?[0-9]\d{1,14}$/, 'Please enter a valid phone number']
     },
     address: {
         type: String,
