@@ -12,7 +12,8 @@ export const registerPatient = async (req: Request, res: Response): Promise<any>
             lastName, 
             dateOfBirth, 
             phoneNumber,
-            address
+            address,
+            gender
         } = req.body;
 
         // Check if patient exists by phone number
@@ -40,9 +41,11 @@ export const registerPatient = async (req: Request, res: Response): Promise<any>
             phoneNumber,
             address: address.trim(),
             status: 'registered',
+            gender,
             timestamps: {
                 registeredAt: new Date()
-            }
+            },
+
         });
 
         await patient.save();
