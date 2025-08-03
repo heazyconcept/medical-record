@@ -18,6 +18,7 @@ export interface Timestamps {
     noteTakenAt: Date;
     doctorReviewedAt: Date;
     medicationDispensedAt?: Date;
+    lastEditedAt?: Date;
 }
 
 export interface IPatient extends Document{
@@ -66,7 +67,8 @@ const PatientSchema: Schema = new Schema({
         registeredAt: {type: Date, default: Date.now},
         notesTakenAt: {type: Date},
         doctorReviewedAt: {type: Date},
-        medicationDispensedAt: {type: Date}
+        medicationDispensedAt: {type: Date},
+        lastEditedAt: {type: Date}
     }
 });
 

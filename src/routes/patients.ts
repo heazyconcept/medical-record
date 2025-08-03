@@ -5,7 +5,9 @@ import {
     registerPatient,
     addNurseNotes,
     addDoctorNote,
-    addMedication
+    addMedication,
+    reconsultPatient,
+    reEditPatientRegistration
 } from '../controllers/patientController';
 import { verifyToken, checkRole } from '../middleware/auth';
 import { UserRole } from '../models/user';
@@ -39,5 +41,11 @@ router.patch('/:id/doctor-note', checkRole(doctorRoles), addDoctorNote);
 
 // Add medication (Pharmacist only)
 router.patch('/:id/medication', checkRole(pharmacistRoles), addMedication);
+
+// Reconsult patient (Doctor only)
+router.patch('/:id/reconsult', checkRole(doctorRoles), reconsultPatient);
+
+// Re-edit patient registration (Registrar only)
+router.put('/:id/registration', checkRole(registrarRoles), reEditPatientRegistration);
 
 export default router; 

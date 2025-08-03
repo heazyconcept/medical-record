@@ -230,7 +230,7 @@ export const addDoctorNote = async (req: Request, res: Response): Promise<void> 
         const updatedPatient = await Patient.findByIdAndUpdate(
             id,
             {
-                doctorNote: { diagnosis, instructions },
+                doctorNotes: { diagnosis, instructions },
                 status: 'awaiting_medication',
                 $set: { 'timestamps.doctorReviewedAt': new Date() }
             },
@@ -278,6 +278,133 @@ export const addMedication = async (req: Request, res: Response): Promise<void> 
         res.json(updatedPatient);
     } catch (error) {
         console.error('Error marking medication as dispensed:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}; 
+
+// Reconsult patient (Doctor only) - allows doctors to update diagnosis and instructions
+export const reconsultPatient = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Check role
+        if (req.user?.role !== 'doctor' && req.user?.role !== 'admin') {
+            res.status(403).json({ message: 'Only doctors can reconsult patients' });
+            return;
+        }
+
+        const { id } = req.params;
+        const { diagnosis, instructions } = req.body;
+
+        const patient = await Patient.findById(id);
+
+        if (!patient) {
+            res.status(404).json({ message: 'Patient not found' });
+            return;
+        }
+
+        // Doctors can reconsult patients who have completed their initial consultation
+        // (have doctor notes and are either awaiting medication or completed)
+        if (!patient.doctorNotes) {
+            res.status(400).json({ message: 'Patient must have initial doctor consultation before reconsultation' });
+            return;
+        }
+
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            id,
+            {
+                doctorNotes: { diagnosis, instructions },
+                status: 'awaiting_medication',
+                $set: { 'timestamps.doctorReviewedAt': new Date() }
+            },
+            { new: true }
+        );
+
+        res.json(updatedPatient);
+    } catch (error) {
+        console.error('Error during reconsultation:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+// Re-edit patient registration (Registrar only)
+export const reEditPatientRegistration = async (req: Request, res: Response): Promise<void> => {
+    try {
+        // Check role
+        if (req.user?.role !== 'registrar' && req.user?.role !== 'admin') {
+            res.status(403).json({ message: 'Only registrars can re-edit patient registration' });
+            return;
+        }
+
+        const { id } = req.params;
+        const {
+            firstName, 
+            lastName, 
+            dateOfBirth, 
+            phoneNumber,
+            address
+        } = req.body;
+
+        const patient = await Patient.findById(id);
+
+        if (!patient) {
+            res.status(404).json({ message: 'Patient not found' });
+            return;
+        }
+
+        // Check if the new phone number conflicts with another patient (excluding current patient)
+        if (phoneNumber && phoneNumber !== patient.phoneNumber) {
+            const existingPatient = await Patient.findOne({ 
+                phoneNumber, 
+                _id: { $ne: id } 
+            });
+            if (existingPatient) {
+                res.status(409).json({
+                    message: 'A patient with this phone number already exists',
+                    existingPatientId: existingPatient._id
+                });
+                return;
+            }
+        }
+
+        if (!address || address.trim().length === 0) {
+            res.status(400).json({ message: 'Address is required' });
+            return;
+        }
+
+        const age = calculateAge(new Date(dateOfBirth));
+
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            id,
+            {
+                firstName,
+                lastName,
+                dateOfBirth,
+                age,
+                phoneNumber,
+                address: address.trim(),
+                $set: { 'timestamps.lastEditedAt': new Date() }
+            },
+            { new: true }
+        );
+
+        res.json(updatedPatient);
+    } catch (error: any) {
+        if (error.name === 'ValidationError') {
+            const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+            res.status(400).json({
+                message: 'Validation error',
+                errors: validationErrors
+            });
+            return;
+        }
+        
+        if (error.code === 11000) {
+            res.status(409).json({
+                message: 'A patient with this phone number already exists'
+            });
+            return;
+        }
+        
+        console.error('Error re-editing patient registration:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 }; 
